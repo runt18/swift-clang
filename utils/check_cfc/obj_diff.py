@@ -23,7 +23,7 @@ def disassemble(objfile):
                          stderr=subprocess.PIPE)
     (out, err) = p.communicate()
     if p.returncode or err:
-        print("Disassemble failed: {}".format(objfile))
+        print("Disassemble failed: {0}".format(objfile))
         sys.exit(1)
     return filter(keep_line, out.split(os.linesep))
 
@@ -32,7 +32,7 @@ def dump_debug(objfile):
     p = subprocess.Popen([disassembler, '-WliaprmfsoRt', objfile], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     (out, err) = p.communicate()
     if p.returncode or err:
-        print("Dump debug failed: {}".format(objfile))
+        print("Dump debug failed: {0}".format(objfile))
         sys.exit(1)
     return filter(keep_line, out.split(os.linesep))
 
