@@ -21,7 +21,9 @@ def get_diag_info(diag):
              'ranges' : diag.ranges,
              'fixits' : diag.fixits }
 
-def get_cursor_id(cursor, cursor_list = []):
+def get_cursor_id(cursor, cursor_list = None):
+    if cursor_list is None:
+        cursor_list = []
     if not opts.showIDs:
         return None
 
