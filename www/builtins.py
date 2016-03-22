@@ -19,7 +19,6 @@ repl_map = {
 '__builtin_ia32_subps': '_mm_sub_ps',
 '__builtin_ia32_subsd': '_mm_sub_sd',
 '__builtin_ia32_subpd': '_mm_sub_pd',
-'__builtin_ia32_subss': '_mm_sub_ss',
 '__builtin_ia32_psubb128': '_mm_sub_epi8',
 '__builtin_ia32_psubw128': '_mm_sub_epi16',
 '__builtin_ia32_psubd128': '_mm_sub_epi32',
