@@ -48,9 +48,9 @@ class TextParameter (ReporterParameter):
   def getHTML(self,r,bugtype,getConfigOption):
     return """\
 <tr>
-<td class="form_clabel">%s:</td>
-<td class="form_value"><input type="text" name="%s_%s" value="%s"></td>
-</tr>"""%(self.getName(),r.getName(),self.getName(),self.getValue(r,bugtype,getConfigOption))
+<td class="form_clabel">{0!s}:</td>
+<td class="form_value"><input type="text" name="{1!s}_{2!s}" value="{3!s}"></td>
+</tr>""".format(self.getName(), r.getName(), self.getName(), self.getValue(r,bugtype,getConfigOption))
 
 class SelectionParameter (ReporterParameter):
   def __init__(self, n, values):
@@ -61,10 +61,10 @@ class SelectionParameter (ReporterParameter):
     default = self.getValue(r,bugtype,getConfigOption)
     return """\
 <tr>
-<td class="form_clabel">%s:</td><td class="form_value"><select name="%s_%s">
-%s
-</select></td>"""%(self.getName(),r.getName(),self.getName(),'\n'.join(["""\
-<option value="%s"%s>%s</option>"""%(o[0],
+<td class="form_clabel">{0!s}:</td><td class="form_value"><select name="{1!s}_{2!s}">
+{3!s}
+</select></td>""".format(self.getName(), r.getName(), self.getName(), '\n'.join(["""\
+<option value="{0!s}"{1!s}>{2!s}</option>""".format(o[0],
                                      o[0] == default and ' selected="selected"' or '',
                                      o[1]) for o in self.values]))
 
@@ -110,9 +110,9 @@ class EmailReporter:
         mainMsg = """\
 BUG REPORT
 ---
-Title: %s
-Description: %s
-"""%(report.title, report.description)
+Title: {0!s}
+Description: {1!s}
+""".format(report.title, report.description)
 
         if not parameters.get('To'):
             raise ReportFailure('No "To" address specified.')
@@ -120,7 +120,7 @@ Description: %s
             raise ReportFailure('No "From" address specified.')
 
         msg = MIMEMultipart()
-        msg['Subject'] = 'BUG REPORT: %s'%(report.title)
+        msg['Subject'] = 'BUG REPORT: {0!s}'.format((report.title))
         # FIXME: Get config parameters
         msg['To'] = parameters.get('To')
         msg['From'] = parameters.get('From')
@@ -235,7 +235,7 @@ class RadarReporter:
         if not bugID:
             raise ReportFailure(message)
         
-        return "Filed: <a href=\"rdar://%d/\">%d</a>"%(bugID,bugID)
+        return "Filed: <a href=\"rdar://{0:d}/\">{1:d}</a>".format(bugID, bugID)
 
 ###
 

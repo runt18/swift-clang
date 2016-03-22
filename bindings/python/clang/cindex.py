@@ -115,7 +115,7 @@ class TranslationUnitSaveError(Exception):
                             "value supported." % enumeration)
 
         self.save_error = enumeration
-        Exception.__init__(self, 'Error %d: %s' % (enumeration, message))
+        Exception.__init__(self, 'Error {0:d}: {1!s}'.format(enumeration, message))
 
 ### Structures and Utility Classes ###
 
@@ -225,7 +225,7 @@ class SourceLocation(Structure):
             filename = self.file.name
         else:
             filename = None
-        return "<SourceLocation file %r, line %r, column %r>" % (
+        return "<SourceLocation file {0!r}, line {1!r}, column {2!r}>".format(
             filename, self.line, self.column)
 
 class SourceRange(Structure):
@@ -290,7 +290,7 @@ class SourceRange(Structure):
         return False
 
     def __repr__(self):
-        return "<SourceRange start %r, end %r>" % (self.start, self.end)
+        return "<SourceRange start {0!r}, end {1!r}>".format(self.start, self.end)
 
 class Diagnostic(object):
     """
@@ -383,7 +383,7 @@ class Diagnostic(object):
         return conf.lib.clang_getCString(disable)
 
     def __repr__(self):
-        return "<Diagnostic severity %r, location %r, spelling %r>" % (
+        return "<Diagnostic severity {0!r}, location {1!r}, spelling {2!r}>".format(
             self.severity, self.location, self.spelling)
 
     def from_param(self):
@@ -401,7 +401,7 @@ class FixIt(object):
         self.value = value
 
     def __repr__(self):
-        return "<FixIt range %r, value %r>" % (self.range, self.value)
+        return "<FixIt range {0!r}, value {1!r}>".format(self.range, self.value)
 
 class TokenGroup(object):
     """Helper class to facilitate token management.
@@ -469,7 +469,7 @@ class TokenKind(object):
         self.name = name
 
     def __repr__(self):
-        return 'TokenKind.%s' % (self.name,)
+        return 'TokenKind.{0!s}'.format(self.name)
 
     @staticmethod
     def from_value(value):
@@ -477,7 +477,7 @@ class TokenKind(object):
         result = TokenKind._value_map.get(value, None)
 
         if result is None:
-            raise ValueError('Unknown TokenKind: %d' % value)
+            raise ValueError('Unknown TokenKind: {0:d}'.format(value))
 
         return result
 
@@ -489,7 +489,7 @@ class TokenKind(object):
         package.
         """
         if value in TokenKind._value_map:
-            raise ValueError('TokenKind already registered: %d' % value)
+            raise ValueError('TokenKind already registered: {0:d}'.format(value))
 
         kind = TokenKind(value, name)
         TokenKind._value_map[value] = kind
@@ -535,11 +535,11 @@ class BaseEnumeration(object):
     @classmethod
     def from_id(cls, id):
         if id >= len(cls._kinds) or cls._kinds[id] is None:
-            raise ValueError,'Unknown template argument kind %d' % id
+            raise ValueError,'Unknown template argument kind {0:d}'.format(id)
         return cls._kinds[id]
 
     def __repr__(self):
-        return '%s.%s' % (self.__class__, self.name,)
+        return '{0!s}.{1!s}'.format(self.__class__, self.name)
 
 
 class CursorKind(BaseEnumeration):
@@ -593,7 +593,7 @@ class CursorKind(BaseEnumeration):
         return conf.lib.clang_isUnexposed(self)
 
     def __repr__(self):
-        return 'CursorKind.%s' % (self.name,)
+        return 'CursorKind.{0!s}'.format(self.name)
 
 ###
 # Declaration Kinds
@@ -1593,11 +1593,11 @@ class StorageClass(object):
     @staticmethod
     def from_id(id):
         if id >= len(StorageClass._kinds) or not StorageClass._kinds[id]:
-            raise ValueError,'Unknown storage class %d' % id
+            raise ValueError,'Unknown storage class {0:d}'.format(id)
         return StorageClass._kinds[id]
 
     def __repr__(self):
-        return 'StorageClass.%s' % (self.name,)
+        return 'StorageClass.{0!s}'.format(self.name)
 
 StorageClass.INVALID = StorageClass(0)
 StorageClass.NONE = StorageClass(1)
@@ -1624,7 +1624,7 @@ class AccessSpecifier(BaseEnumeration):
         return self.value
 
     def __repr__(self):
-        return 'AccessSpecifier.%s' % (self.name,)
+        return 'AccessSpecifier.{0!s}'.format(self.name)
 
 AccessSpecifier.INVALID = AccessSpecifier(0)
 AccessSpecifier.PUBLIC = AccessSpecifier(1)
@@ -1649,7 +1649,7 @@ class TypeKind(BaseEnumeration):
         return conf.lib.clang_getTypeKindSpelling(self.value)
 
     def __repr__(self):
-        return 'TypeKind.%s' % (self.name,)
+        return 'TypeKind.{0!s}'.format(self.name)
 
 TypeKind.INVALID = TypeKind(0)
 TypeKind.UNEXPOSED = TypeKind(1)
@@ -1711,7 +1711,7 @@ class RefQualifierKind(BaseEnumeration):
         return self.value
 
     def __repr__(self):
-        return 'RefQualifierKind.%s' % (self.name,)
+        return 'RefQualifierKind.{0!s}'.format(self.name)
 
 RefQualifierKind.NONE = RefQualifierKind(0)
 RefQualifierKind.LVALUE = RefQualifierKind(1)
@@ -2010,7 +2010,7 @@ class CompletionChunk:
             return self.name
 
         def __repr__(self):
-            return "<ChunkKind: %s>" % self
+            return "<ChunkKind: {0!s}>".format(self)
 
     def __init__(self, completionString, key):
         self.cs = completionString
@@ -2097,7 +2097,7 @@ class CompletionString(ClangObject):
             return self.name
 
         def __repr__(self):
-            return "<Availability: %s>" % self
+            return "<Availability: {0!s}>".format(self)
 
     def __len__(self):
         return self.num_chunks
@@ -2629,7 +2629,7 @@ class File(ClangObject):
         return self.name
 
     def __repr__(self):
-        return "<File: %s>" % (self.name)
+        return "<File: {0!s}>".format((self.name))
 
     @staticmethod
     def from_cursor_result(res, fn, args):
@@ -2682,7 +2682,7 @@ class CompilationDatabaseError(Exception):
                             "value supported." % enumeration)
 
         self.cdb_error = enumeration
-        Exception.__init__(self, 'Error %d: %s' % (enumeration, message))
+        Exception.__init__(self, 'Error {0:d}: {1!s}'.format(enumeration, message))
 
 class CompileCommand(object):
     """Represents the compile command used to build a file"""

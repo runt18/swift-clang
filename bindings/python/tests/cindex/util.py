@@ -22,7 +22,7 @@ def get_tu(source, lang='c', all_warnings=False, flags=[]):
     elif lang == 'objc':
         name = 't.m'
     elif lang != 'c':
-        raise Exception('Unknown language: %s' % lang)
+        raise Exception('Unknown language: {0!s}'.format(lang))
 
     if all_warnings:
         args += ['-Wall', '-Wextra']

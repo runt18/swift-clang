@@ -12,8 +12,8 @@ DOC_FILE = '../ClangFormatStyleOptions.rst'
 
 
 def substitute(text, tag, contents):
-  replacement = '\n.. START_%s\n\n%s\n\n.. END_%s\n' % (tag, contents, tag)
-  pattern = r'\n\.\. START_%s\n.*\n\.\. END_%s\n' % (tag, tag)
+  replacement = '\n.. START_{0!s}\n\n{1!s}\n\n.. END_{2!s}\n'.format(tag, contents, tag)
+  pattern = r'\n\.\. START_{0!s}\n.*\n\.\. END_{1!s}\n'.format(tag, tag)
   return re.sub(pattern, '%s', text, flags=re.S) % replacement
 
 def doxygen2rst(text):
@@ -39,12 +39,12 @@ class Option:
     self.nested_struct = None
 
   def __str__(self):
-    s = '**%s** (``%s``)\n%s' % (self.name, self.type,
+    s = '**{0!s}** (``{1!s}``)\n{2!s}'.format(self.name, self.type,
                                  doxygen2rst(indent(self.comment, 2)))
     if self.enum:
-      s += indent('\n\nPossible values:\n\n%s\n' % self.enum, 2)
+      s += indent('\n\nPossible values:\n\n{0!s}\n'.format(self.enum), 2)
     if self.nested_struct:
-      s += indent('\n\nNested configuration flags:\n\n%s\n' %self.nested_struct,
+      s += indent('\n\nNested configuration flags:\n\n{0!s}\n'.format(self.nested_struct),
                   2)
     return s
 
@@ -63,7 +63,7 @@ class NestedField:
     self.comment = comment.strip()
 
   def __str__(self):
-    return '* ``%s`` %s' % (self.name, doxygen2rst(self.comment))
+    return '* ``{0!s}`` {1!s}'.format(self.name, doxygen2rst(self.comment))
 
 class Enum:
   def __init__(self, name, comment):
@@ -80,7 +80,7 @@ class EnumValue:
     self.comment = comment.strip()
 
   def __str__(self):
-    return '* ``%s`` (in configuration: ``%s``)\n%s' % (
+    return '* ``{0!s}`` (in configuration: ``{1!s}``)\n{2!s}'.format(
         self.name,
         re.sub('.*_', '', self.name),
         doxygen2rst(indent(self.comment, 2)))
@@ -176,7 +176,7 @@ def read_options(header):
       elif nested_structs.has_key(option.type):
         option.nested_struct = nested_structs[option.type];
       else:
-        raise Exception('Unknown type: %s' % option.type)
+        raise Exception('Unknown type: {0!s}'.format(option.type))
   return options
 
 options = read_options(open(FORMAT_STYLE_FILE))

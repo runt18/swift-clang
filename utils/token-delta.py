@@ -171,12 +171,12 @@ class TMBDDelta(DeltaAlgorithm):
                     indices = byFile[i]
                     if i:
                         sys.stderr.write('\n      ')
-                    sys.stderr.write('%s:%d tokens: [' % (file,len(byFile[i])))
+                    sys.stderr.write('{0!s}:{1:d} tokens: ['.format(file, len(byFile[i])))
                     prev = None
                     for j in byFile[i]:
                         if prev is None or j != prev + 1:
                             if prev:
-                                sys.stderr.write('%d][' % prev)
+                                sys.stderr.write('{0:d}]['.format(prev))
                             sys.stderr.write(str(j))
                             sys.stderr.write(':')
                         prev = j
@@ -184,7 +184,7 @@ class TMBDDelta(DeltaAlgorithm):
                         sys.stderr.write(str(byFile[i][-1]))
                     sys.stderr.write('] ')
             else:
-                print >>sys.stderr, ', '.join(['%s:%d tokens' % (file, len(byFile[i]))
+                print >>sys.stderr, ', '.join(['{0!s}:{1:d} tokens'.format(file, len(byFile[i]))
                                                for i,(file,_) in enumerate(self.tokenLists)]),
 
         p = subprocess.Popen([self.testProgram] + self.tempFiles)
@@ -194,10 +194,10 @@ class TMBDDelta(DeltaAlgorithm):
             self.writeFiles(changes, self.targetFiles)
 
         if self.log:
-            print >>sys.stderr, '=> %s' % res
+            print >>sys.stderr, '=> {0!s}'.format(res)
         else:
             if res:
-                print '\nSUCCESS (%d tokens)' % len(changes)
+                print '\nSUCCESS ({0:d} tokens)'.format(len(changes))
             else:                
                 sys.stderr.write('.')
 
@@ -218,13 +218,13 @@ def tokenBasedMultiDelta(program, files, log):
                   for file in files]
 
     numTokens = sum([len(tokens) for _,tokens in tokenLists])
-    print "Delta on %s with %d tokens." % (', '.join(files), numTokens)
+    print "Delta on {0!s} with {1:d} tokens.".format(', '.join(files), numTokens)
     
     tbmd = TMBDDelta(program, tokenLists, log)
 
     res = tbmd.run()
 
-    print "Finished %s with %d tokens (in %d tests)." % (', '.join(tbmd.targetFiles),
+    print "Finished {0!s} with {1:d} tokens (in {2:d} tests).".format(', '.join(tbmd.targetFiles),
                                                          len(res),
                                                          tbmd.numTests)
         

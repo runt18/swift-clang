@@ -38,16 +38,16 @@ def esc(text):
   text = re.sub(r'>', '&gt;', text)
   def link_if_exists(m):
     name = m.group(1)
-    url = 'http://clang.llvm.org/doxygen/classclang_1_1%s.html' % name
+    url = 'http://clang.llvm.org/doxygen/classclang_1_1{0!s}.html'.format(name)
     if url not in doxygen_probes:
       try:
-        print 'Probing %s...' % url
+        print 'Probing {0!s}...'.format(url)
         urllib2.urlopen(url)
         doxygen_probes[url] = True
       except:
         doxygen_probes[url] = False
     if doxygen_probes[url]:
-      return r'Matcher&lt<a href="%s">%s</a>&gt;' % (url, name)
+      return r'Matcher&lt<a href="{0!s}">{1!s}</a>&gt;'.format(url, name)
     else:
       return m.group(0)
   text = re.sub(
@@ -100,11 +100,11 @@ def add_matcher(result_type, name, args, comment, is_dyncast=False):
   if name == 'id':
      # FIXME: Figure out whether we want to support the 'id' matcher.
      return
-  matcher_id = '%s%d' % (name, ids[name])
+  matcher_id = '{0!s}{1:d}'.format(name, ids[name])
   ids[name] += 1
   args = unify_arguments(args)
   matcher_html = TD_TEMPLATE % {
-    'result': esc('Matcher<%s>' % result_type),
+    'result': esc('Matcher<{0!s}>'.format(result_type)),
     'name': name,
     'args': esc(args),
     'comment': esc(strip_doxygen(comment)),
@@ -141,7 +141,7 @@ def act_on_decl(declaration, comment, allowed_types):
       result, inner, name = m.groups()
       if not inner:
         inner = result
-      add_matcher(result, name, 'Matcher<%s>...' % inner,
+      add_matcher(result, name, 'Matcher<{0!s}>...'.format(inner),
                   comment, is_dyncast=True)
       return
 
@@ -152,7 +152,7 @@ def act_on_decl(declaration, comment, allowed_types):
                      \)\s*;\s*$""", declaration, flags=re.X)
     if m:
       inner, name = m.groups()
-      add_matcher('Type', name, 'Matcher<%s>...' % inner,
+      add_matcher('Type', name, 'Matcher<{0!s}>...'.format(inner),
                   comment, is_dyncast=True)
       # FIXME: re-enable once we have implemented casting on the TypeLoc
       # hierarchy.
@@ -172,11 +172,11 @@ def act_on_decl(declaration, comment, allowed_types):
       comment_result_types = extract_result_types(comment)
       if (comment_result_types and
           sorted(result_types) != sorted(comment_result_types)):
-        raise Exception('Inconsistent documentation for: %s' % name)
+        raise Exception('Inconsistent documentation for: {0!s}'.format(name))
       for result_type in result_types:
         add_matcher(result_type, name, 'Matcher<Type>', comment)
         if loc:
-          add_matcher('%sLoc' % result_type, '%sLoc' % name, 'Matcher<TypeLoc>',
+          add_matcher('{0!s}Loc'.format(result_type), '{0!s}Loc'.format(name), 'Matcher<TypeLoc>',
                       comment)
       return
 
@@ -195,10 +195,10 @@ def act_on_decl(declaration, comment, allowed_types):
       args = m.groups()[4:]
       result_types = [r.strip() for r in results.split(',')]
       if allowed_types and allowed_types != result_types:
-        raise Exception('Inconsistent documentation for: %s' % name)
+        raise Exception('Inconsistent documentation for: {0!s}'.format(name))
       if n not in ['', '2']:
-        raise Exception('Cannot parse "%s"' % declaration)
-      args = ', '.join('%s %s' % (args[i], args[i+1])
+        raise Exception('Cannot parse "{0!s}"'.format(declaration))
+      args = ', '.join('{0!s} {1!s}'.format(args[i], args[i+1])
                        for i in range(0, len(args), 2) if args[i])
       for result_type in result_types:
         add_matcher(result_type, name, args, comment)
@@ -217,8 +217,8 @@ def act_on_decl(declaration, comment, allowed_types):
       p, n, result, name = m.groups()[0:4]
       args = m.groups()[4:]
       if n not in ['', '2']:
-        raise Exception('Cannot parse "%s"' % declaration)
-      args = ', '.join('%s %s' % (args[i], args[i+1])
+        raise Exception('Cannot parse "{0!s}"'.format(declaration))
+      args = ', '.join('{0!s} {1!s}'.format(args[i], args[i+1])
                        for i in range(0, len(args), 2) if args[i])
       add_matcher(result, name, args, comment)
       return
@@ -237,13 +237,13 @@ def act_on_decl(declaration, comment, allowed_types):
       args = m.groups()[4:]
       if not result:
         if not allowed_types:
-          raise Exception('Did not find allowed result types for: %s' % name)
+          raise Exception('Did not find allowed result types for: {0!s}'.format(name))
         result_types = allowed_types
       else:
         result_types = [result]
       if n not in ['', '2']:
-        raise Exception('Cannot parse "%s"' % declaration)
-      args = ', '.join('%s %s' % (args[i], args[i+1])
+        raise Exception('Cannot parse "{0!s}"'.format(declaration))
+      args = ', '.join('{0!s} {1!s}'.format(args[i], args[i+1])
                        for i in range(0, len(args), 2) if args[i])
       for result_type in result_types:
         add_matcher(result_type, name, args, comment)
@@ -291,9 +291,9 @@ def act_on_decl(declaration, comment, allowed_types):
       if not result_types:
         if not comment:
           # Only overloads don't have their own doxygen comments; ignore those.
-          print 'Ignoring "%s"' % name
+          print 'Ignoring "{0!s}"'.format(name)
         else:
-          print 'Cannot determine result type for "%s"' % name
+          print 'Cannot determine result type for "{0!s}"'.format(name)
       else:
         for result_type in result_types:
           add_matcher(result_type, name, args, comment)

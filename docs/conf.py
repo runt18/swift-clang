@@ -42,7 +42,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'Clang'
-copyright = u'2007-%d, The Clang Team' % date.today().year
+copyright = u'2007-{0:d}, The Clang Team'.format(date.today().year)
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -234,8 +234,8 @@ for name in os.listdir(command_guide_path):
 
         if len(header) != len(title):
             print >>sys.stderr, (
-                "error: invalid header in %r (does not match title)" % (
-                    file_subpath,))
+                "error: invalid header in {0!r} (does not match title)".format(
+                    file_subpath))
         if ' - ' not in title:
             print >>sys.stderr, (
                 ("error: invalid title in %r "

@@ -217,8 +217,8 @@ def runScript(ScriptPath, PBuildLogFile, Cwd):
     if os.path.exists(ScriptPath):
         try:
             if Verbose == 1:
-                print "  Executing: %s" % (ScriptPath,)
-            check_call("chmod +x %s" % ScriptPath, cwd = Cwd,
+                print "  Executing: {0!s}".format(ScriptPath)
+            check_call("chmod +x {0!s}".format(ScriptPath), cwd = Cwd,
                                               stderr=PBuildLogFile,
                                               stdout=PBuildLogFile,
                                               shell=True)
@@ -226,7 +226,7 @@ def runScript(ScriptPath, PBuildLogFile, Cwd):
                                               stdout=PBuildLogFile,
                                               shell=True)
         except:
-            print "Error: Running %s failed. See %s for details." % (ScriptPath,
+            print "Error: Running {0!s} failed. See {1!s} for details.".format(ScriptPath,
                 PBuildLogFile.name)
             sys.exit(-1)
 
@@ -239,7 +239,7 @@ def downloadAndPatch(Dir, PBuildLogFile):
     if not os.path.exists(CachedSourceDirPath):
       runDownloadScript(Dir, PBuildLogFile)
       if not os.path.exists(CachedSourceDirPath):
-        print "Error: '%s' not found after download." % (CachedSourceDirPath)
+        print "Error: '{0!s}' not found after download.".format((CachedSourceDirPath))
         exit(-1)
 
     PatchedSourceDirPath = os.path.join(Dir, PatchedSourceDirName)
@@ -261,13 +261,13 @@ def applyPatch(Dir, PBuildLogFile):
 
     print "  Applying patch."
     try:
-        check_call("patch -p1 < %s" % (PatchfilePath),
+        check_call("patch -p1 < {0!s}".format((PatchfilePath)),
                     cwd = PatchedSourceDirPath,
                     stderr=PBuildLogFile,
                     stdout=PBuildLogFile,
                     shell=True)
     except:
-        print "Error: Patch failed. See %s for details." % (PBuildLogFile.name)
+        print "Error: Patch failed. See {0!s} for details.".format((PBuildLogFile.name))
         sys.exit(-1)
 
 # Build the project with scan-build by reading in the commands and
@@ -275,7 +275,7 @@ def applyPatch(Dir, PBuildLogFile):
 def runScanBuild(Dir, SBOutputDir, PBuildLogFile):
     BuildScriptPath = os.path.join(Dir, BuildScript)
     if not os.path.exists(BuildScriptPath):
-        print "Error: build script is not defined: %s" % BuildScriptPath
+        print "Error: build script is not defined: {0!s}".format(BuildScriptPath)
         sys.exit(-1)
 
     AllCheckers = Checkers
@@ -304,10 +304,10 @@ def runScanBuild(Dir, SBOutputDir, PBuildLogFile):
             # automatically use the maximum number of cores.
             if (Command.startswith("make ") or Command == "make") and \
                 "-j" not in Command:
-                Command += " -j%d" % Jobs
+                Command += " -j{0:d}".format(Jobs)
             SBCommand = SBPrefix + Command
             if Verbose == 1:
-                print "  Executing: %s" % (SBCommand,)
+                print "  Executing: {0!s}".format(SBCommand)
             check_call(SBCommand, cwd = SBCwd, stderr=PBuildLogFile,
                                                stdout=PBuildLogFile,
                                                shell=True)
@@ -342,8 +342,8 @@ def getSDKPath(SDKName):
 # Run analysis on a set of preprocessed files.
 def runAnalyzePreprocessed(Dir, SBOutputDir, Mode):
     if os.path.exists(os.path.join(Dir, BuildScript)):
-        print "Error: The preprocessed files project should not contain %s" % \
-               BuildScript
+        print "Error: The preprocessed files project should not contain {0!s}".format( \
+               BuildScript)
         raise Exception()
 
     CmdPrefix = Clang + " -cc1 "
@@ -372,7 +372,7 @@ def runAnalyzePreprocessed(Dir, SBOutputDir, Mode):
         if (hasNoExtension(FileName)):
             continue
         if (isValidSingleInputFile(FileName) == False):
-            print "Error: Invalid single input file %s." % (FullFileName,)
+            print "Error: Invalid single input file {0!s}.".format(FullFileName)
             raise Exception()
 
         # Build and call the analyzer command.
@@ -381,7 +381,7 @@ def runAnalyzePreprocessed(Dir, SBOutputDir, Mode):
         LogFile = open(os.path.join(FailPath, FileName + ".stderr.txt"), "w+b")
         try:
             if Verbose == 1:
-                print "  Executing: %s" % (Command,)
+                print "  Executing: {0!s}".format(Command)
             check_call(Command, cwd = Dir, stderr=LogFile,
                                            stdout=LogFile,
                                            shell=True)
@@ -401,21 +401,21 @@ def buildProject(Dir, SBOutputDir, ProjectBuildMode, IsReferenceBuild):
     TBegin = time.time()
 
     BuildLogPath = os.path.join(SBOutputDir, LogFolderName, BuildLogName)
-    print "Log file: %s" % (BuildLogPath,)
-    print "Output directory: %s" %(SBOutputDir, )
+    print "Log file: {0!s}".format(BuildLogPath)
+    print "Output directory: {0!s}".format(SBOutputDir )
 
     # Clean up the log file.
     if (os.path.exists(BuildLogPath)) :
         RmCommand = "rm " + BuildLogPath
         if Verbose == 1:
-            print "  Executing: %s" % (RmCommand,)
+            print "  Executing: {0!s}".format(RmCommand)
         check_call(RmCommand, shell=True)
 
     # Clean up scan build results.
     if (os.path.exists(SBOutputDir)) :
         RmCommand = "rm -r " + SBOutputDir
         if Verbose == 1:
-            print "  Executing: %s" % (RmCommand,)
+            print "  Executing: {0!s}".format(RmCommand)
             check_call(RmCommand, shell=True)
     assert(not os.path.exists(SBOutputDir))
     os.makedirs(os.path.join(SBOutputDir, LogFolderName))
@@ -454,8 +454,7 @@ def buildProject(Dir, SBOutputDir, ProjectBuildMode, IsReferenceBuild):
     finally:
         PBuildLogFile.close()
 
-    print "Build complete (time: %.2f). See the log for more details: %s" % \
-           ((time.time()-TBegin), BuildLogPath)
+    print "Build complete (time: {0:.2f}). See the log for more details: {1!s}".format((time.time()-TBegin), BuildLogPath)
 
 # A plist file is created for each call to the analyzer(each source file).
 # We are only interested on the once that have bug reports, so delete the rest.
@@ -479,21 +478,20 @@ def checkBuild(SBOutputDir):
     if TotalFailed == 0:
         CleanUpEmptyPlists(SBOutputDir)
         Plists = glob.glob(SBOutputDir + "/*/*.plist")
-        print "Number of bug reports (non-empty plist files) produced: %d" %\
-           len(Plists)
+        print "Number of bug reports (non-empty plist files) produced: {0:d}".format(\
+           len(Plists))
         return;
 
     # Create summary file to display when the build fails.
     SummaryPath = os.path.join(SBOutputDir, LogFolderName, FailuresSummaryFileName)
     if (Verbose > 0):
-        print "  Creating the failures summary file %s" % (SummaryPath,)
+        print "  Creating the failures summary file {0!s}".format(SummaryPath)
 
     SummaryLog = open(SummaryPath, "w+")
     try:
-        SummaryLog.write("Total of %d failures discovered.\n" % (TotalFailed,))
+        SummaryLog.write("Total of {0:d} failures discovered.\n".format(TotalFailed))
         if TotalFailed > NumOfFailuresInSummary:
-            SummaryLog.write("See the first %d below.\n"
-                                                   % (NumOfFailuresInSummary,))
+            SummaryLog.write("See the first {0:d} below.\n".format(NumOfFailuresInSummary))
         # TODO: Add a line "See the results folder for more."
 
         FailuresCopied = NumOfFailuresInSummary
@@ -502,7 +500,7 @@ def checkBuild(SBOutputDir):
             if Idx >= NumOfFailuresInSummary:
                 break;
             Idx += 1
-            SummaryLog.write("\n-- Error #%d -----------\n" % (Idx,));
+            SummaryLog.write("\n-- Error #{0:d} -----------\n".format(Idx));
             FailLogI = open(FailLogPathI, "r");
             try:
                 shutil.copyfileobj(FailLogI, SummaryLog);
@@ -560,7 +558,7 @@ def runCmpResults(Dir, Strictness = 0):
 
         assert(RefDir != NewDir)
         if Verbose == 1:
-            print "  Comparing Results: %s %s" % (RefDir, NewDir)
+            print "  Comparing Results: {0!s} {1!s}".format(RefDir, NewDir)
 
         DiffsPath = os.path.join(NewDir, DiffsSummaryFileName)
         PatchedSourceDirPath = os.path.join(Dir, PatchedSourceDirName)
@@ -573,8 +571,7 @@ def runCmpResults(Dir, Strictness = 0):
             CmpRuns.dumpScanBuildResultsDiff(RefDir, NewDir, Opts, False)
         sys.stdout = OLD_STDOUT
         if (NumDiffs > 0) :
-            print "Warning: %r differences in diagnostics. See %s" % \
-                  (NumDiffs, DiffsPath,)
+            print "Warning: {0!r} differences in diagnostics. See {1!s}".format(NumDiffs, DiffsPath)
         if Strictness >= 2 and NumDiffs > 0:
             print "Error: Diffs found in strict mode (2)."
             sys.exit(-1)
@@ -582,7 +579,7 @@ def runCmpResults(Dir, Strictness = 0):
             print "Error: The number of results are different in strict mode (1)."
             sys.exit(-1)
 
-    print "Diagnostic comparison complete (time: %.2f)." % (time.time()-TBegin)
+    print "Diagnostic comparison complete (time: {0:.2f}).".format((time.time()-TBegin))
     return (NumDiffs > 0)
 
 def updateSVN(Mode, ProjectsMap):
@@ -593,12 +590,12 @@ def updateSVN(Mode, ProjectsMap):
             Path = os.path.join(ProjName, getSBOutputDirName(True))
 
             if Mode == "delete":
-                Command = "svn delete %s" % (Path,)
+                Command = "svn delete {0!s}".format(Path)
             else:
-                Command = "svn add %s" % (Path,)
+                Command = "svn add {0!s}".format(Path)
 
             if Verbose == 1:
-                print "  Executing: %s" % (Command,)
+                print "  Executing: {0!s}".format(Command)
             check_call(Command, shell=True)
 
         if Mode == "delete":
@@ -608,21 +605,21 @@ def updateSVN(Mode, ProjectsMap):
             CommitCommand = "svn commit -m \"[analyzer tests] Add new " \
                             "reference results.\""
         if Verbose == 1:
-            print "  Executing: %s" % (CommitCommand,)
+            print "  Executing: {0!s}".format(CommitCommand)
         check_call(CommitCommand, shell=True)
     except:
         print "Error: SVN update failed."
         sys.exit(-1)
 
 def testProject(ID, ProjectBuildMode, IsReferenceBuild=False, Dir=None, Strictness = 0):
-    print " \n\n--- Building project %s" % (ID,)
+    print " \n\n--- Building project {0!s}".format(ID)
 
     TBegin = time.time()
 
     if Dir is None :
         Dir = getProjectDir(ID)
     if Verbose == 1:
-        print "  Build directory: %s." % (Dir,)
+        print "  Build directory: {0!s}.".format(Dir)
 
     # Set the build results directory.
     RelOutputDir = getSBOutputDirName(IsReferenceBuild)
@@ -635,8 +632,7 @@ def testProject(ID, ProjectBuildMode, IsReferenceBuild=False, Dir=None, Strictne
     if IsReferenceBuild == False:
         runCmpResults(Dir, Strictness)
 
-    print "Completed tests for project %s (time: %.2f)." % \
-          (ID, (time.time()-TBegin))
+    print "Completed tests for project {0!s} (time: {1:.2f}).".format(ID, (time.time()-TBegin))
 
 def testAll(IsReferenceBuild = False, UpdateSVN = False, Strictness = 0):
     PMapFile = open(getProjectMapPath(), "rb")
