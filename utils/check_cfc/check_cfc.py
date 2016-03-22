@@ -122,7 +122,7 @@ def derive_output_file(args):
     if infile is None:
         return None
     else:
-        return '{}.o'.format(os.path.splitext(infile)[0])
+        return '{0}.o'.format(os.path.splitext(infile)[0])
 
 def get_output_file(args):
     """Return the output file specified by this command or None if not
@@ -268,7 +268,7 @@ class dash_g_no_change(WrapperCheck):
                                                    output_file_b)
         if difference:
             raise WrapperCheckException(
-                "Code difference detected with -g\n{}".format(difference))
+                "Code difference detected with -g\n{0}".format(difference))
 
         # Clean up temp file if comparison okay
         os.remove(output_file_b)
@@ -292,14 +292,14 @@ class dash_s_no_change(WrapperCheck):
                                                        output_file_b)
             if difference:
                 raise WrapperCheckException(
-                    "Code difference detected with -S\n{}".format(difference))
+                    "Code difference detected with -S\n{0}".format(difference))
 
             # Code is identical, compare debug info
             dbgdifference = obj_diff.compare_debug_info(self._output_file_a,
                                                         output_file_b)
             if dbgdifference:
                 raise WrapperCheckException(
-                    "Debug info difference detected with -S\n{}".format(dbgdifference))
+                    "Debug info difference detected with -S\n{0}".format(dbgdifference))
 
             raise WrapperCheckException("Object files not identical with -S\n")
 
@@ -316,7 +316,7 @@ if __name__ == '__main__':
     checks = [cls.__name__ for cls in vars()['WrapperCheck'].__subclasses__()]
 
     for c in checks:
-        default_config += "{} = false\n".format(c)
+        default_config += "{0} = false\n".format(c)
 
     config = ConfigParser.RawConfigParser()
     config.readfp(io.BytesIO(default_config))
@@ -341,7 +341,7 @@ if __name__ == '__main__':
                       for check_name in checks
                       if config.getboolean('Checks', check_name)]
     checks_comma_separated = ', '.join(enabled_checks)
-    print("Check CFC, checking: {}".format(checks_comma_separated))
+    print("Check CFC, checking: {0}".format(checks_comma_separated))
 
     # A - original compilation
     output_file_orig = get_output_file(arguments_a)
@@ -381,7 +381,7 @@ if __name__ == '__main__':
                 checker.perform_check(arguments_a, my_env)
             except WrapperCheckException as e:
                 # Check failure
-                print("{} {}".format(get_input_file(arguments_a), e.msg), file=sys.stderr)
+                print("{0} {1}".format(get_input_file(arguments_a), e.msg), file=sys.stderr)
 
                 # Remove file to comply with build system expectations (no
                 # output file if failed)
