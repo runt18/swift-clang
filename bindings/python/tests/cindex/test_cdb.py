@@ -24,7 +24,7 @@ def test_create():
 def test_lookup_fail():
     """Check file lookup failure"""
     cdb = CompilationDatabase.fromDirectory(kInputsDir)
-    assert cdb.getCompileCommands('file_do_not_exist.cpp') == None
+    assert cdb.getCompileCommands('file_do_not_exist.cpp') is None
 
 def test_lookup_succeed():
     """Check we get some results if the file exists in the db"""
