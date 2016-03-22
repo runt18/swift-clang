@@ -96,12 +96,12 @@ class ReporterThread(threading.Thread):
         result = None
         try:
             if self.server.options.debug:
-                print >>sys.stderr, "%s: SERVER: submitting bug."%(sys.argv[0],)
+                print >>sys.stderr, "{0!s}: SERVER: submitting bug.".format(sys.argv[0])
             self.status = self.reporter.fileReport(self.report, self.parameters)
             self.success = True
             time.sleep(3)
             if self.server.options.debug:
-                print >>sys.stderr, "%s: SERVER: submission complete."%(sys.argv[0],)
+                print >>sys.stderr, "{0!s}: SERVER: submission complete.".format(sys.argv[0])
         except Reporter.ReportFailure,e:
             self.status = e.value
         except Exception,e:
@@ -155,12 +155,12 @@ class ScanViewServer(BaseHTTPServer.HTTPServer):
     def halt(self):
         self.halted = True
         if self.options.debug:
-            print >>sys.stderr, "%s: SERVER: halting." % (sys.argv[0],)
+            print >>sys.stderr, "{0!s}: SERVER: halting.".format(sys.argv[0])
 
     def serve_forever(self):
         while not self.halted:
             if self.options.debug > 1:
-                print >>sys.stderr, "%s: SERVER: waiting..." % (sys.argv[0],)
+                print >>sys.stderr, "{0!s}: SERVER: waiting...".format(sys.argv[0])
             try:
                 self.handle_request()
             except OSError,e:
@@ -177,7 +177,7 @@ class ScanViewServer(BaseHTTPServer.HTTPServer):
         info = sys.exc_info()
         if info and isinstance(info[1], socket.error):
             if self.options.debug > 1:
-                print >>sys.stderr, "%s: SERVER: ignored socket error." % (sys.argv[0],)
+                print >>sys.stderr, "{0!s}: SERVER: ignored socket error.".format(sys.argv[0])
             return
         BaseHTTPServer.HTTPServer.handle_error(self, request, client_address)
 
@@ -235,14 +235,13 @@ class ScanViewRequestHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
 
     def log_message(self, format, *args):
         if self.server.options.debug:
-            sys.stderr.write("%s: SERVER: %s - - [%s] %s\n" %
-                             (sys.argv[0],
+            sys.stderr.write("{0!s}: SERVER: {1!s} - - [{2!s}] {3!s}\n".format(sys.argv[0],
                               self.address_string(),
                               self.log_date_time_string(),
                               format%args))
 
     def load_report(self, report):
-        path = os.path.join(self.server.root, 'report-%s.html'%report)
+        path = os.path.join(self.server.root, 'report-{0!s}.html'.format(report))
         data = open(path).read()
         keys = {}
         for item in kBugKeyValueRE.finditer(data):
@@ -305,10 +304,10 @@ class ScanViewRequestHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
         reporter = self.server.reporters[reporterIndex]
         parameters = {}
         for o in reporter.getParameters():
-            name = '%s_%s'%(reporter.getName(),o.getName())
+            name = '{0!s}_{1!s}'.format(reporter.getName(), o.getName())
             if name not in self.fields:
                 return (False, 
-                        'Missing field "%s" for %s report method.'%(name,
+                        'Missing field "{0!s}" for {1!s} report method.'.format(name,
                                                                     reporter.getName()))
             parameters[o.getName()] = self.get_scalar_field(name)
 
@@ -340,11 +339,11 @@ class ScanViewRequestHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
         if c.reportSource is None:
             reportingFor = "Report Crashes > "
             fileBug = """\
-<a href="/report_crashes">File Bug</a> > """%locals()
+<a href="/report_crashes">File Bug</a> > """.format(*locals())
         else:
-            reportingFor = '<a href="/%s">Report %s</a> > ' % (c.reportSource, 
+            reportingFor = '<a href="/{0!s}">Report {1!s}</a> > '.format(c.reportSource, 
                                                                    report)
-            fileBug = '<a href="/report/%s">File Bug</a> > ' % report
+            fileBug = '<a href="/report/{0!s}">File Bug</a> > '.format(report)
         title = self.get_scalar_field('title')
         description = self.get_scalar_field('description')
 
@@ -365,8 +364,8 @@ class ScanViewRequestHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
 <body>
 <h3>
 <a href="/">Summary</a> > 
-%(reportingFor)s
-%(fileBug)s
+{reportingFor!s}
+{fileBug!s}
 Submit</h3>
 <form name="form" action="">
 <table class="form">
@@ -375,27 +374,27 @@ Submit</h3>
 <tr>
   <td class="form_clabel">Title:</td>
   <td class="form_value">
-    <input type="text" name="title" size="50" value="%(title)s" disabled>
+    <input type="text" name="title" size="50" value="{title!s}" disabled>
   </td>
 </tr>
 <tr>
   <td class="form_label">Description:</td>
   <td class="form_value">
 <textarea rows="10" cols="80" name="description" disabled>
-%(description)s
+{description!s}
 </textarea>
   </td>
 </table>
 </td></tr>
 </table>
 </form>
-<h1 class="%(statusClass)s">Submission %(statusName)s</h1>
-%(message)s
+<h1 class="{statusClass!s}">Submission {statusName!s}</h1>
+{message!s}
 <p>
 <hr>
 <a href="/">Return to Summary</a>
 </body>
-</html>"""%locals()
+</html>""".format(**locals())
         return self.send_string(result)
 
     def send_open_report(self, report):
@@ -406,18 +405,18 @@ Submit</h3>
 
         file = keys.get('FILE')
         if not file or not posixpath.exists(file):
-            return self.send_error(400, 'File does not exist: "%s"' % file)
+            return self.send_error(400, 'File does not exist: "{0!s}"'.format(file))
 
         import startfile
         if self.server.options.debug:
-            print >>sys.stderr, '%s: SERVER: opening "%s"'%(sys.argv[0],
+            print >>sys.stderr, '{0!s}: SERVER: opening "{1!s}"'.format(sys.argv[0],
                                                             file)
 
         status = startfile.open(file)
         if status:
-            res = 'Opened: "%s"' % file
+            res = 'Opened: "{0!s}"'.format(file)
         else:
-            res = 'Open failed: "%s"' % file
+            res = 'Open failed: "{0!s}"'.format(file)
 
         return self.send_string(res, 'text/plain')
 
@@ -438,18 +437,18 @@ Submit</h3>
                     path = posixpath.join(self.server.root, item['stderr'])
                     if os.path.exists(path):
                         lns = itertools.islice(open(path), 0, 10)
-                        stderrSummary += '%s\n--\n%s' % (item.get('src', 
+                        stderrSummary += '{0!s}\n--\n{1!s}'.format(item.get('src', 
                                                                   '<unknown>'),
                                                          ''.join(lns))
 
             c.description = """\
 The clang static analyzer failed on these inputs:
-%s
+{0!s}
 
 STDERR Summary
 --------------
-%s
-""" % ('\n'.join([item.get('src','<unknown>') for item in data]),
+{1!s}
+""".format('\n'.join([item.get('src','<unknown>') for item in data]),
        stderrSummary)
             c.reportSource = None
             c.navMarkup = "Report Crashes > "
@@ -470,7 +469,7 @@ STDERR Summary
                        if os.path.exists(f) and os.path.isfile(f)]
         else:
             # Check that this is a valid report.            
-            path = posixpath.join(self.server.root, 'report-%s.html' % report)
+            path = posixpath.join(self.server.root, 'report-{0!s}.html'.format(report))
             if not posixpath.exists(path):
                 raise ValueError, 'Invalid report ID'
             keys = self.load_report(report)
@@ -479,12 +478,12 @@ STDERR Summary
             c.description = """\
 Bug reported by the clang static analyzer.
 
-Description: %s
-File: %s
-Line: %s
-"""%(c.title, keys.get('FILE','<unknown>'), keys.get('LINE', '<unknown>'))
-            c.reportSource = 'report-%s.html' % report
-            c.navMarkup = """<a href="/%s">Report %s</a> > """ % (c.reportSource,
+Description: {0!s}
+File: {1!s}
+Line: {2!s}
+""".format(c.title, keys.get('FILE','<unknown>'), keys.get('LINE', '<unknown>'))
+            c.reportSource = 'report-{0!s}.html'.format(report)
+            c.navMarkup = """<a href="/{0!s}">Report {1!s}</a> > """.format(c.reportSource,
                                                                   report)
 
             c.files = [path]
@@ -511,10 +510,10 @@ Line: %s
             extraIFrame = ""
         else:
             extraIFrame = """\
-<iframe src="/%s" width="100%%" height="40%%"
+<iframe src="/{0!s}" width="100%" height="40%"
         scrolling="auto" frameborder="1">
-  <a href="/%s">View Bug Report</a>
-</iframe>""" % (c.reportSource, c.reportSource)
+  <a href="/{1!s}">View Bug Report</a>
+</iframe>""".format(c.reportSource, c.reportSource)
 
         reporterSelections = []
         reporterOptions = []
@@ -529,37 +528,37 @@ Line: %s
                 selectedStr = ' selected'
             else:
                 selectedStr = ''
-            reporterSelections.append('<option value="%d"%s>%s</option>'%(i,selectedStr,r.getName()))
+            reporterSelections.append('<option value="{0:d}"{1!s}>{2!s}</option>'.format(i, selectedStr, r.getName()))
             options = '\n'.join([ o.getHTML(r,title,getConfigOption) for o in r.getParameters()])
             display = ('none','')[selected]
             reporterOptions.append("""\
-<tr id="%sReporterOptions" style="display:%s">
-  <td class="form_label">%s Options</td>
+<tr id="{0!s}ReporterOptions" style="display:{1!s}">
+  <td class="form_label">{2!s} Options</td>
   <td class="form_value">
     <table class="form_inner_group">
-%s
+{3!s}
     </table>
   </td>
 </tr>
-"""%(r.getName(),display,r.getName(),options))
+""".format(r.getName(), display, r.getName(), options))
         reporterSelections = '\n'.join(reporterSelections)
         reporterOptionsDivs = '\n'.join(reporterOptions)
-        reportersArray = '[%s]'%(','.join([`r.getName()` for r in self.server.reporters]))
+        reportersArray = '[{0!s}]'.format((','.join([`r.getName()` for r in self.server.reporters])))
 
         if c.files:
             fieldSize = min(5, len(c.files))
             attachFileOptions = '\n'.join(["""\
-<option value="%d" selected>%s</option>""" % (i,v) for i,v in enumerate(c.files)])
+<option value="{0:d}" selected>{1!s}</option>""".format(i, v) for i,v in enumerate(c.files)])
             attachFileRow = """\
 <tr>
   <td class="form_label">Attach:</td>
   <td class="form_value">
-<select style="width:100%%" name="files" multiple size=%d>
-%s
+<select style="width:100%" name="files" multiple size={0:d}>
+{1!s}
 </select>
   </td>
 </tr>
-""" % (min(5, len(c.files)), attachFileOptions)
+""".format(min(5, len(c.files)), attachFileOptions)
         else:
             attachFileRow = ""
 
@@ -569,26 +568,26 @@ Line: %s
   <link rel="stylesheet" type="text/css" href="/scanview.css" />
 </head>
 <script language="javascript" type="text/javascript">
-var reporters = %(reportersArray)s;
-function updateReporterOptions() {
+var reporters = {reportersArray!s};
+function updateReporterOptions() {{
   index = document.getElementById('reporter').selectedIndex;
-  for (var i=0; i < reporters.length; ++i) {
+  for (var i=0; i < reporters.length; ++i) {{
     o = document.getElementById(reporters[i] + "ReporterOptions");
-    if (i == index) {
+    if (i == index) {{
       o.style.display = "";
-    } else {
+    }} else {{
       o.style.display = "none";
-    }
-  }
-}
+    }}
+  }}
+}}
 </script>
 <body onLoad="updateReporterOptions()">
 <h3>
 <a href="/">Summary</a> > 
-%(reportingFor)s
+{reportingFor!s}
 File Bug</h3>
 <form name="form" action="/report_submit" method="post">
-<input type="hidden" name="report" value="%(report)s">
+<input type="hidden" name="report" value="{report!s}">
 
 <table class="form">
 <tr><td>
@@ -596,19 +595,19 @@ File Bug</h3>
 <tr>
   <td class="form_clabel">Title:</td>
   <td class="form_value">
-    <input type="text" name="title" size="50" value="%(title)s">
+    <input type="text" name="title" size="50" value="{title!s}">
   </td>
 </tr>
 <tr>
   <td class="form_label">Description:</td>
   <td class="form_value">
 <textarea rows="10" cols="80" name="description">
-%(description)s
+{description!s}
 </textarea>
   </td>
 </tr>
 
-%(attachFileRow)s
+{attachFileRow!s}
 
 </table>
 <br>
@@ -617,11 +616,11 @@ File Bug</h3>
   <td class="form_clabel">Method:</td>
   <td class="form_value">
     <select id="reporter" name="reporter" onChange="updateReporterOptions()">
-    %(reporterSelections)s
+    {reporterSelections!s}
     </select>
   </td>
 </tr>
-%(reporterOptionsDivs)s
+{reporterOptionsDivs!s}
 </table>
 <br>
 </td></tr>
@@ -631,10 +630,10 @@ File Bug</h3>
 </table>
 </form>
 
-%(extraIFrame)s
+{extraIFrame!s}
 
 </body>
-</html>"""%locals()
+</html>""".format(**locals())
 
         return self.send_string(result)
 
@@ -690,7 +689,7 @@ File Bug</h3>
         path = posixpath.join(self.server.root, relpath)
 
         if self.server.options.debug > 1:
-            print >>sys.stderr, '%s: SERVER: sending path "%s"'%(sys.argv[0],
+            print >>sys.stderr, '{0!s}: SERVER: sending path "{1!s}"'.format(sys.argv[0],
                                                                  path)
         return self.send_path(path)
 

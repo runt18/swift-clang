@@ -40,7 +40,7 @@ class TypePrinter:
         if headerName:
             for f in (self.output,self.outputTests,self.outputDriver):
                 if f is not None:
-                    print >>f, '#include "%s"\n'%(headerName,)
+                    print >>f, '#include "{0!s}"\n'.format(headerName)
         
         if self.outputDriver:
             print >>self.outputDriver, '#include <stdio.h>'
@@ -55,8 +55,8 @@ class TypePrinter:
             print >>self.output, '  int index = -1;'
             print >>self.output, '  if (argc > 1) index = atoi(argv[1]);'
             for i,f in self.layoutTests:
-                print >>self.output, '  if (index == -1 || index == %d)' % i
-                print >>self.output, '    %s();' % f
+                print >>self.output, '  if (index == -1 || index == {0:d})'.format(i)
+                print >>self.output, '    {0!s}();'.format(f)
             print >>self.output, '  return 0;'
             print >>self.output, '}' 
 
@@ -89,19 +89,19 @@ class TypePrinter:
     def writeLayoutTest(self, i, ty):
         tyName = self.getTypeName(ty)
         tyNameClean = tyName.replace(' ','_').replace('*','star')
-        fnName = 'test_%s' % tyNameClean
+        fnName = 'test_{0!s}'.format(tyNameClean)
             
-        print >>self.output,'void %s(void) {' % fnName
-        self.printSizeOfType('    %s'%fnName, tyName, ty, self.output)
-        self.printAlignOfType('    %s'%fnName, tyName, ty, self.output)
-        self.printOffsetsOfType('    %s'%fnName, tyName, ty, self.output)
+        print >>self.output,'void {0!s}(void) {{'.format(fnName)
+        self.printSizeOfType('    {0!s}'.format(fnName), tyName, ty, self.output)
+        self.printAlignOfType('    {0!s}'.format(fnName), tyName, ty, self.output)
+        self.printOffsetsOfType('    {0!s}'.format(fnName), tyName, ty, self.output)
         print >>self.output,'}'
         print >>self.output
         
         self.layoutTests.append((i,fnName))
         
     def writeFunction(self, i, FT):
-        args = ', '.join(['%s arg%d'%(self.getTypeName(t),i) for i,t in enumerate(FT.argTypes)])
+        args = ', '.join(['{0!s} arg{1:d}'.format(self.getTypeName(t), i) for i,t in enumerate(FT.argTypes)])
         if not args:
             args = 'void'
 
@@ -113,73 +113,73 @@ class TypePrinter:
             if self.writeBody or self.outputTests:
                 retvalName = self.getTestReturnValue(FT.returnType)
 
-        fnName = 'fn%d'%(FT.index,)
+        fnName = 'fn{0:d}'.format(FT.index)
         if self.outputHeader:
-            print >>self.outputHeader,'%s %s(%s);'%(retvalTypeName, fnName, args)
+            print >>self.outputHeader,'{0!s} {1!s}({2!s});'.format(retvalTypeName, fnName, args)
         elif self.outputTests:
-            print >>self.outputTests,'%s %s(%s);'%(retvalTypeName, fnName, args)
+            print >>self.outputTests,'{0!s} {1!s}({2!s});'.format(retvalTypeName, fnName, args)
             
-        print >>self.output,'%s %s(%s)'%(retvalTypeName, fnName, args),
+        print >>self.output,'{0!s} {1!s}({2!s})'.format(retvalTypeName, fnName, args),
         if self.writeBody:
             print >>self.output, '{'
             
             for i,t in enumerate(FT.argTypes):
-                self.printValueOfType('    %s'%fnName, 'arg%d'%i, t)
+                self.printValueOfType('    {0!s}'.format(fnName), 'arg{0:d}'.format(i), t)
 
             if retvalName is not None:
-                print >>self.output, '  return %s;'%(retvalName,)
+                print >>self.output, '  return {0!s};'.format(retvalName)
             print >>self.output, '}'
         else:
             print >>self.output, '{}'
         print >>self.output
 
         if self.outputDriver:
-            print >>self.outputDriver, '  if (index == -1 || index == %d) {' % i
-            print >>self.outputDriver, '    extern void test_%s(void);' % fnName
-            print >>self.outputDriver, '    test_%s();' % fnName
+            print >>self.outputDriver, '  if (index == -1 || index == {0:d}) {{'.format(i)
+            print >>self.outputDriver, '    extern void test_{0!s}(void);'.format(fnName)
+            print >>self.outputDriver, '    test_{0!s}();'.format(fnName)
             print >>self.outputDriver, '   }'
             
         if self.outputTests:
             if self.outputHeader:
-                print >>self.outputHeader, 'void test_%s(void);'%(fnName,)
+                print >>self.outputHeader, 'void test_{0!s}(void);'.format(fnName)
 
             if retvalName is None:
                 retvalTests = None
             else:
                 retvalTests = self.getTestValuesArray(FT.returnType)
             tests = map(self.getTestValuesArray, FT.argTypes)
-            print >>self.outputTests, 'void test_%s(void) {'%(fnName,)
+            print >>self.outputTests, 'void test_{0!s}(void) {{'.format(fnName)
 
             if retvalTests is not None:
-                print >>self.outputTests, '  printf("%s: testing return.\\n");'%(fnName,)
-                print >>self.outputTests, '  for (int i=0; i<%d; ++i) {'%(retvalTests[1],)
-                args = ', '.join(['%s[%d]'%(t,randrange(l)) for t,l in tests])
-                print >>self.outputTests, '    %s RV;'%(retvalTypeName,)
-                print >>self.outputTests, '    %s = %s[i];'%(retvalName, retvalTests[0])
-                print >>self.outputTests, '    RV = %s(%s);'%(fnName, args)
-                self.printValueOfType('  %s_RV'%fnName, 'RV', FT.returnType, output=self.outputTests, indent=4)
-                self.checkTypeValues('RV', '%s[i]' % retvalTests[0], FT.returnType, output=self.outputTests, indent=4)
+                print >>self.outputTests, '  printf("{0!s}: testing return.\\n");'.format(fnName)
+                print >>self.outputTests, '  for (int i=0; i<{0:d}; ++i) {{'.format(retvalTests[1])
+                args = ', '.join(['{0!s}[{1:d}]'.format(t, randrange(l)) for t,l in tests])
+                print >>self.outputTests, '    {0!s} RV;'.format(retvalTypeName)
+                print >>self.outputTests, '    {0!s} = {1!s}[i];'.format(retvalName, retvalTests[0])
+                print >>self.outputTests, '    RV = {0!s}({1!s});'.format(fnName, args)
+                self.printValueOfType('  {0!s}_RV'.format(fnName), 'RV', FT.returnType, output=self.outputTests, indent=4)
+                self.checkTypeValues('RV', '{0!s}[i]'.format(retvalTests[0]), FT.returnType, output=self.outputTests, indent=4)
                 print >>self.outputTests, '  }'
             
             if tests:
-                print >>self.outputTests, '  printf("%s: testing arguments.\\n");'%(fnName,)
+                print >>self.outputTests, '  printf("{0!s}: testing arguments.\\n");'.format(fnName)
             for i,(array,length) in enumerate(tests):
                 for j in range(length):
-                    args = ['%s[%d]'%(t,randrange(l)) for t,l in tests]
-                    args[i] = '%s[%d]'%(array,j)
-                    print >>self.outputTests, '  %s(%s);'%(fnName, ', '.join(args),)
+                    args = ['{0!s}[{1:d}]'.format(t, randrange(l)) for t,l in tests]
+                    args[i] = '{0!s}[{1:d}]'.format(array, j)
+                    print >>self.outputTests, '  {0!s}({1!s});'.format(fnName, ', '.join(args))
             print >>self.outputTests, '}'
 
     def getTestReturnValue(self, type):
         typeName = self.getTypeName(type)        
         info = self.testReturnValues.get(typeName)
         if info is None:
-            name = '%s_retval'%(typeName.replace(' ','_').replace('*','star'),)
-            print >>self.output, '%s %s;'%(typeName,name)
+            name = '{0!s}_retval'.format(typeName.replace(' ','_').replace('*','star'))
+            print >>self.output, '{0!s} {1!s};'.format(typeName, name)
             if self.outputHeader:
-                print >>self.outputHeader, 'extern %s %s;'%(typeName,name)
+                print >>self.outputHeader, 'extern {0!s} {1!s};'.format(typeName, name)
             elif self.outputTests:                
-                print >>self.outputTests, 'extern %s %s;'%(typeName,name)
+                print >>self.outputTests, 'extern {0!s} {1!s};'.format(typeName, name)
             info = self.testReturnValues[typeName] = name
         return info
 
@@ -187,11 +187,11 @@ class TypePrinter:
         typeName = self.getTypeName(type)        
         info = self.testValues.get(typeName)
         if info is None:
-            name = '%s_values'%(typeName.replace(' ','_').replace('*','star'),)
-            print >>self.outputTests, 'static %s %s[] = {'%(typeName,name)
+            name = '{0!s}_values'.format(typeName.replace(' ','_').replace('*','star'))
+            print >>self.outputTests, 'static {0!s} {1!s}[] = {{'.format(typeName, name)
             length = 0
             for item in self.getTestValues(type):
-                print >>self.outputTests, '\t%s,'%(item,)
+                print >>self.outputTests, '\t{0!s},'.format(item)
                 length += 1
             print >>self.outputTests,'};'
             info = self.testValues[typeName] = (name,length)
@@ -209,12 +209,12 @@ class TypePrinter:
                 yield '(void*) 0'
                 yield '(void*) -1'
             else:
-                yield '(%s) 0'%(t.name,)
-                yield '(%s) -1'%(t.name,)
-                yield '(%s) 1'%(t.name,)
+                yield '({0!s}) 0'.format(t.name)
+                yield '({0!s}) -1'.format(t.name)
+                yield '({0!s}) 1'.format(t.name)
         elif isinstance(t, EnumType):
             for i in range(0, len(t.enumerators)):
-                yield 'enum%dval%d_%d' % (t.index, i, t.unique_id)
+                yield 'enum{0:d}val{1:d}_{2:d}'.format(t.index, i, t.unique_id)
         elif isinstance(t, RecordType):
             nonPadding = [f for f in t.fields 
                           if not f.isPaddingBitField()]
@@ -227,7 +227,7 @@ class TypePrinter:
             # fields of unions.
             if t.isUnion:
                 for v in self.getTestValues(nonPadding[0]):
-                    yield '{ %s }' % v
+                    yield '{{ {0!s} }}'.format(v)
                 return
 
             fieldValues = map(list, map(self.getTestValues, nonPadding))
@@ -235,11 +235,11 @@ class TypePrinter:
                 for v in values:
                     elements = map(random.choice,fieldValues)
                     elements[i] = v
-                    yield '{ %s }'%(', '.join(elements))
+                    yield '{{ {0!s} }}'.format((', '.join(elements)))
 
         elif isinstance(t, ComplexType):
             for t in self.getTestValues(t.elementType):
-                yield '%s + %s * 1i'%(t,t)
+                yield '{0!s} + {1!s} * 1i'.format(t, t)
         elif isinstance(t, ArrayType):
             values = list(self.getTestValues(t.elementType))
             if not values:
@@ -248,9 +248,9 @@ class TypePrinter:
                 for v in values:
                     elements = [random.choice(values) for i in range(t.numElements)]
                     elements[i] = v
-                    yield '{ %s }'%(', '.join(elements))
+                    yield '{{ {0!s} }}'.format((', '.join(elements)))
         else:
-            raise NotImplementedError,'Cannot make tests values of type: "%s"'%(t,)
+            raise NotImplementedError,'Cannot make tests values of type: "{0!s}"'.format(t)
 
     def printSizeOfType(self, prefix, name, t, output=None, indent=2):
         print >>output, '%*sprintf("%s: sizeof(%s) = %%ld\\n", (long)sizeof(%s));'%(indent, '', prefix, name, name) 
@@ -261,7 +261,7 @@ class TypePrinter:
             for i,f in enumerate(t.fields):
                 if f.isBitField():
                     continue
-                fname = 'field%d' % i
+                fname = 'field{0:d}'.format(i)
                 print >>output, '%*sprintf("%s: __builtin_offsetof(%s, %s) = %%ld\\n", (long)__builtin_offsetof(%s, %s));'%(indent, '', prefix, name, fname, name, fname) 
                 
     def printValueOfType(self, prefix, name, t, output=None, indent=2):
@@ -271,7 +271,7 @@ class TypePrinter:
             value_expr = name
             if t.name.split(' ')[-1] == '_Bool':
                 # Hack to work around PR5579.
-                value_expr = "%s ? 2 : 0" % name
+                value_expr = "{0!s} ? 2 : 0".format(name)
 
             if t.name.endswith('long long'):
                 code = 'lld'
@@ -296,21 +296,21 @@ class TypePrinter:
             for i,f in enumerate(t.fields):
                 if f.isPaddingBitField():
                     continue
-                fname = '%s.field%d'%(name,i)
+                fname = '{0!s}.field{1:d}'.format(name, i)
                 self.printValueOfType(prefix, fname, f, output=output, indent=indent)
         elif isinstance(t, ComplexType):
-            self.printValueOfType(prefix, '(__real %s)'%name, t.elementType, output=output,indent=indent)
-            self.printValueOfType(prefix, '(__imag %s)'%name, t.elementType, output=output,indent=indent)
+            self.printValueOfType(prefix, '(__real {0!s})'.format(name), t.elementType, output=output,indent=indent)
+            self.printValueOfType(prefix, '(__imag {0!s})'.format(name), t.elementType, output=output,indent=indent)
         elif isinstance(t, ArrayType):
             for i in range(t.numElements):
                 # Access in this fashion as a hackish way to portably
                 # access vectors.
                 if t.isVector:
-                    self.printValueOfType(prefix, '((%s*) &%s)[%d]'%(t.elementType,name,i), t.elementType, output=output,indent=indent)
+                    self.printValueOfType(prefix, '(({0!s}*) &{1!s})[{2:d}]'.format(t.elementType, name, i), t.elementType, output=output,indent=indent)
                 else:
-                    self.printValueOfType(prefix, '%s[%d]'%(name,i), t.elementType, output=output,indent=indent)                    
+                    self.printValueOfType(prefix, '{0!s}[{1:d}]'.format(name, i), t.elementType, output=output,indent=indent)                    
         else:
-            raise NotImplementedError,'Cannot print value of type: "%s"'%(t,)
+            raise NotImplementedError,'Cannot print value of type: "{0!s}"'.format(t)
 
     def checkTypeValues(self, nameLHS, nameRHS, t, output=None, indent=2):
         prefix = 'foo'
@@ -324,26 +324,26 @@ class TypePrinter:
             for i,f in enumerate(t.fields):
                 if f.isPaddingBitField():
                     continue
-                self.checkTypeValues('%s.field%d'%(nameLHS,i), '%s.field%d'%(nameRHS,i), 
+                self.checkTypeValues('{0!s}.field{1:d}'.format(nameLHS, i), '{0!s}.field{1:d}'.format(nameRHS, i), 
                                      f, output=output, indent=indent)
                 if t.isUnion:
                     break
         elif isinstance(t, ComplexType):
-            self.checkTypeValues('(__real %s)'%nameLHS, '(__real %s)'%nameRHS, t.elementType, output=output,indent=indent)
-            self.checkTypeValues('(__imag %s)'%nameLHS, '(__imag %s)'%nameRHS, t.elementType, output=output,indent=indent)
+            self.checkTypeValues('(__real {0!s})'.format(nameLHS), '(__real {0!s})'.format(nameRHS), t.elementType, output=output,indent=indent)
+            self.checkTypeValues('(__imag {0!s})'.format(nameLHS), '(__imag {0!s})'.format(nameRHS), t.elementType, output=output,indent=indent)
         elif isinstance(t, ArrayType):
             for i in range(t.numElements):
                 # Access in this fashion as a hackish way to portably
                 # access vectors.
                 if t.isVector:
-                    self.checkTypeValues('((%s*) &%s)[%d]'%(t.elementType,nameLHS,i), 
-                                         '((%s*) &%s)[%d]'%(t.elementType,nameRHS,i), 
+                    self.checkTypeValues('(({0!s}*) &{1!s})[{2:d}]'.format(t.elementType, nameLHS, i), 
+                                         '(({0!s}*) &{1!s})[{2:d}]'.format(t.elementType, nameRHS, i), 
                                          t.elementType, output=output,indent=indent)
                 else:
-                    self.checkTypeValues('%s[%d]'%(nameLHS,i), '%s[%d]'%(nameRHS,i), 
+                    self.checkTypeValues('{0!s}[{1:d}]'.format(nameLHS, i), '{0!s}[{1:d}]'.format(nameRHS, i), 
                                          t.elementType, output=output,indent=indent)                    
         else:
-            raise NotImplementedError,'Cannot print value of type: "%s"'%(t,)
+            raise NotImplementedError,'Cannot print value of type: "{0!s}"'.format(t)
 
 import sys
 
@@ -493,8 +493,8 @@ def main():
         if opts.useLong: ints.append(('long',4))
         if opts.useLongLong: ints.append(('long long',8))
         if opts.useUnsigned: 
-            ints = ([('unsigned %s'%i,s) for i,s in ints] + 
-                    [('signed %s'%i,s) for i,s in ints])
+            ints = ([('unsigned {0!s}'.format(i),s) for i,s in ints] + 
+                    [('signed {0!s}'.format(i),s) for i,s in ints])
         builtins.extend(ints)
 
         if opts.useBool: builtins.append(('_Bool',1))
@@ -543,7 +543,7 @@ def main():
             for i,t in enumerate(opts.vectorTypes.split(',')):
                 m = re.match('v([1-9][0-9]*)([if][1-9][0-9]*)', t.strip())
                 if not m:
-                    parser.error('Invalid vector type: %r' % t)
+                    parser.error('Invalid vector type: {0!r}'.format(t))
                 count,kind = m.groups()
                 count = int(count)
                 type = { 'i8'  : charType, 
@@ -554,7 +554,7 @@ def main():
                          'f64' : doubleType,
                          }.get(kind)
                 if not type:
-                    parser.error('Invalid vector type: %r' % t)
+                    parser.error('Invalid vector type: {0!r}'.format(t))
                 vTypes.append(ArrayType(i, True, type, count * type.size))
                 
             atg.addGenerator(FixedTypeGenerator(vTypes))
@@ -624,10 +624,10 @@ def main():
         atexit.register(lambda: outputDriver.close())
 
     info = ''
-    info += '// %s\n'%(' '.join(sys.argv),)
-    info += '// Generated: %s\n'%(time.strftime('%Y-%m-%d %H:%M'),)
-    info += '// Cardinality of function generator: %s\n'%(ftg.cardinality,)
-    info += '// Cardinality of type generator: %s\n'%(atg.cardinality,)
+    info += '// {0!s}\n'.format(' '.join(sys.argv))
+    info += '// Generated: {0!s}\n'.format(time.strftime('%Y-%m-%d %H:%M'))
+    info += '// Cardinality of function generator: {0!s}\n'.format(ftg.cardinality)
+    info += '// Cardinality of type generator: {0!s}\n'.format(atg.cardinality)
 
     if opts.testLayout:
         info += '\n#include <stdio.h>'
@@ -644,7 +644,7 @@ def main():
             FT = ftg.get(N)
         except RuntimeError,e:
             if e.args[0]=='maximum recursion depth exceeded':
-                print >>sys.stderr,'WARNING: Skipped %d, recursion limit exceeded (bad arguments?)'%(N,)
+                print >>sys.stderr,'WARNING: Skipped {0:d}, recursion limit exceeded (bad arguments?)'.format(N)
                 return
             raise
         if opts.testLayout:

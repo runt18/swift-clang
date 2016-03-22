@@ -25,7 +25,7 @@ class Type:
         return False
 
     def getTypeName(self, printer):
-        name = 'T%d' % len(printer.types)
+        name = 'T{0:d}'.format(len(printer.types))
         typedef = self.getTypedefDef(name, printer)
         printer.addDeclaration(typedef)
         return name
@@ -69,17 +69,17 @@ class EnumType(Type):
         for i, init in enumerate(self.enumerators):
             if i > 0:
                 result = result + ', '
-            result = result + 'enum%dval%d_%d' % (self.index, i, self.unique_id)
+            result = result + 'enum{0:d}val{1:d}_{2:d}'.format(self.index, i, self.unique_id)
             if init:
-                result = result + ' = %s' % (init)
+                result = result + ' = {0!s}'.format((init))
 
         return result
 
     def __str__(self):
-        return 'enum { %s }' % (self.getEnumerators())
+        return 'enum {{ {0!s} }}'.format((self.getEnumerators()))
 
     def getTypedefDef(self, name, printer):
-        return 'typedef enum %s { %s } %s;'%(name, self.getEnumerators(), name)
+        return 'typedef enum {0!s} {{ {1!s} }} {2!s};'.format(name, self.getEnumerators(), name)
 
 class RecordType(Type):
     def __init__(self, index, isUnion, fields):
@@ -91,26 +91,26 @@ class RecordType(Type):
     def __str__(self):
         def getField(t):
             if t.isBitField():
-                return "%s : %d;" % (t, t.getBitFieldSize())
+                return "{0!s} : {1:d};".format(t, t.getBitFieldSize())
             else:
-                return "%s;" % t
+                return "{0!s};".format(t)
 
-        return '%s { %s }'%(('struct','union')[self.isUnion],
+        return '{0!s} {{ {1!s} }}'.format(('struct','union')[self.isUnion],
                             ' '.join(map(getField, self.fields)))
 
     def getTypedefDef(self, name, printer):
         def getField((i, t)):
             if t.isBitField():
                 if t.isPaddingBitField():
-                    return '%s : 0;'%(printer.getTypeName(t),)
+                    return '{0!s} : 0;'.format(printer.getTypeName(t))
                 else:
-                    return '%s field%d : %d;'%(printer.getTypeName(t),i,
+                    return '{0!s} field{1:d} : {2:d};'.format(printer.getTypeName(t), i,
                                                t.getBitFieldSize())
             else:
-                return '%s field%d;'%(printer.getTypeName(t),i)
+                return '{0!s} field{1:d};'.format(printer.getTypeName(t), i)
         fields = map(getField, enumerate(self.fields))
         # Name the struct for more readable LLVM IR.
-        return 'typedef %s %s { %s } %s;'%(('struct','union')[self.isUnion],
+        return 'typedef {0!s} {1!s} {{ {2!s} }} {3!s};'.format(('struct','union')[self.isUnion],
                                            name, ' '.join(fields), name)
                                            
 class ArrayType(Type):
@@ -133,16 +133,16 @@ class ArrayType(Type):
 
     def __str__(self):
         if self.isVector:
-            return 'vector (%s)[%d]'%(self.elementType,self.size)
+            return 'vector ({0!s})[{1:d}]'.format(self.elementType, self.size)
         elif self.size is not None:
-            return '(%s)[%d]'%(self.elementType,self.size)
+            return '({0!s})[{1:d}]'.format(self.elementType, self.size)
         else:
-            return '(%s)[]'%(self.elementType,)
+            return '({0!s})[]'.format(self.elementType)
 
     def getTypedefDef(self, name, printer):
         elementName = printer.getTypeName(self.elementType)
         if self.isVector:
-            return 'typedef %s %s __attribute__ ((vector_size (%d)));'%(elementName,
+            return 'typedef {0!s} {1!s} __attribute__ ((vector_size ({2:d})));'.format(elementName,
                                                                         name,
                                                                         self.size)
         else:
@@ -150,7 +150,7 @@ class ArrayType(Type):
                 sizeStr = ''
             else:
                 sizeStr = str(self.size)
-            return 'typedef %s %s[%s];'%(elementName, name, sizeStr)
+            return 'typedef {0!s} {1!s}[{2!s}];'.format(elementName, name, sizeStr)
 
 class ComplexType(Type):
     def __init__(self, index, elementType):
@@ -158,10 +158,10 @@ class ComplexType(Type):
         self.elementType = elementType
 
     def __str__(self):
-        return '_Complex (%s)'%(self.elementType)
+        return '_Complex ({0!s})'.format((self.elementType))
 
     def getTypedefDef(self, name, printer):
-        return 'typedef _Complex %s %s;'%(printer.getTypeName(self.elementType), name)
+        return 'typedef _Complex {0!s} {1!s};'.format(printer.getTypeName(self.elementType), name)
 
 class FunctionType(Type):
     def __init__(self, index, returnType, argTypes):
@@ -178,7 +178,7 @@ class FunctionType(Type):
             at = 'void'
         else:
             at = ', '.join(map(str, self.argTypes))
-        return '%s (*)(%s)'%(rt, at)
+        return '{0!s} (*)({1!s})'.format(rt, at)
 
     def getTypedefDef(self, name, printer):
         if self.returnType is None:
@@ -189,7 +189,7 @@ class FunctionType(Type):
             at = 'void'
         else:
             at = ', '.join(map(str, self.argTypes))
-        return 'typedef %s (*%s)(%s);'%(rt, name, at)
+        return 'typedef {0!s} (*{1!s})({2!s});'.format(rt, name, at)
 
 ###
 # Type enumerators
@@ -469,7 +469,7 @@ def test():
                 raise RuntimeError,"Cardinality was wrong"
             except AssertionError:
                 break
-        print '%4d: %s'%(i, atg.get(i))
+        print '{0:4d}: {1!s}'.format(i, atg.get(i))
 
 if __name__ == '__main__':
     test()

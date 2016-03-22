@@ -61,7 +61,7 @@ def addNewProject(ID, BuildMode) :
     CurDir = os.path.abspath(os.curdir)
     Dir = SATestBuild.getProjectDir(ID)
     if not os.path.exists(Dir):
-        print "Error: Project directory is missing: %s" % Dir
+        print "Error: Project directory is missing: {0!s}".format(Dir)
         sys.exit(-1)
 
     # Build the project.

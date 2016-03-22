@@ -80,7 +80,7 @@ class AnalysisDiagnostic:
         return os.path.join(self._report.run.path, self._htmlReport)
 
     def getReadableName(self):
-        return '%s:%d:%d, %s: %s' % (self.getFileName(), self.getLine(),
+        return '{0!s}:{1:d}:{2:d}, {3!s}: {4!s}'.format(self.getFileName(), self.getLine(),
                                      self.getColumn(), self.getCategory(),
                                      self.getDescription())
 
@@ -269,24 +269,23 @@ def dumpScanBuildResultsDiff(dirA, dirB, opts, deleteEmpty=True):
     for res in diff:
         a,b,confidence = res
         if a is None:
-            print "ADDED: %r" % b.getReadableName()
+            print "ADDED: {0!r}".format(b.getReadableName())
             foundDiffs += 1
             if auxLog:
-                print >>auxLog, ("('ADDED', %r, %r)" % (b.getReadableName(),
+                print >>auxLog, ("('ADDED', {0!r}, {1!r})".format(b.getReadableName(),
                                                         b.getReport()))
         elif b is None:
-            print "REMOVED: %r" % a.getReadableName()
+            print "REMOVED: {0!r}".format(a.getReadableName())
             foundDiffs += 1
             if auxLog:
-                print >>auxLog, ("('REMOVED', %r, %r)" % (a.getReadableName(),
+                print >>auxLog, ("('REMOVED', {0!r}, {1!r})".format(a.getReadableName(),
                                                           a.getReport()))
         elif confidence:
-            print "CHANGED: %r to %r" % (a.getReadableName(),
+            print "CHANGED: {0!r} to {1!r}".format(a.getReadableName(),
                                          b.getReadableName())
             foundDiffs += 1
             if auxLog:
-                print >>auxLog, ("('CHANGED', %r, %r, %r, %r)"
-                                 % (a.getReadableName(),
+                print >>auxLog, ("('CHANGED', {0!r}, {1!r}, {2!r}, {3!r})".format(a.getReadableName(),
                                     b.getReadableName(),
                                     a.getReport(),
                                     b.getReport()))
@@ -294,11 +293,11 @@ def dumpScanBuildResultsDiff(dirA, dirB, opts, deleteEmpty=True):
             pass
 
     TotalReports = len(resultsB.diagnostics)
-    print "TOTAL REPORTS: %r" % TotalReports
-    print "TOTAL DIFFERENCES: %r" % foundDiffs
+    print "TOTAL REPORTS: {0!r}".format(TotalReports)
+    print "TOTAL DIFFERENCES: {0!r}".format(foundDiffs)
     if auxLog:
-        print >>auxLog, "('TOTAL NEW REPORTS', %r)" % TotalReports
-        print >>auxLog, "('TOTAL DIFFERENCES', %r)" % foundDiffs
+        print >>auxLog, "('TOTAL NEW REPORTS', {0!r})".format(TotalReports)
+        print >>auxLog, "('TOTAL DIFFERENCES', {0!r})".format(foundDiffs)
 
     return foundDiffs, len(resultsA.diagnostics), len(resultsB.diagnostics)
 

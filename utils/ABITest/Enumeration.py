@@ -234,8 +234,8 @@ def testPairs():
         x,y = getNthPairBounded(i,W,H)
         x2,y2 = getNthPairBounded(i,W,H,useDivmod=True)
         print i,(x,y),(x2,y2)
-        a[y][x] = '%2d'%i
-        b[y2][x2] = '%2d'%i
+        a[y][x] = '{0:2d}'.format(i)
+        b[y2][x2] = '{0:2d}'.format(i)
 
     print '-- a --'
     for ln in a[::-1]:
@@ -253,7 +253,7 @@ def testPairsVB():
     for i in range(min(sum(bounds),40)):
         x,y = getNthPairVariableBounds(i, bounds)
         print i,(x,y)
-        a[y][x] = '%2d'%i
+        a[y][x] = '{0:2d}'.format(i)
 
     print '-- a --'
     for ln in a[::-1]:

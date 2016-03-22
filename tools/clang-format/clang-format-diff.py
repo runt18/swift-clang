@@ -66,17 +66,17 @@ def main():
   filename = None
   lines_by_file = {}
   for line in sys.stdin:
-    match = re.search('^\+\+\+\ (.*?/){%s}(\S*)' % args.p, line)
+    match = re.search('^\+\+\+\ (.*?/){{{0!s}}}(\S*)'.format(args.p), line)
     if match:
       filename = match.group(2)
     if filename == None:
       continue
 
     if args.regex is not None:
-      if not re.match('^%s$' % args.regex, filename):
+      if not re.match('^{0!s}$'.format(args.regex), filename):
         continue
     else:
-      if not re.match('^%s$' % args.iregex, filename, re.IGNORECASE):
+      if not re.match('^{0!s}$'.format(args.iregex), filename, re.IGNORECASE):
         continue
 
     match = re.search('^@@.*\+(\d+)(,(\d+))?', line)

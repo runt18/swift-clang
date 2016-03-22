@@ -51,10 +51,10 @@ class SourceLocation(object):
 		return getValueFromExpression(self.srcloc, ".isMacroID()").GetValueAsUnsigned()
 
 	def isLocal(self, srcmgr_path):
-		return self.frame.EvaluateExpression("(%s).isLocalSourceLocation(%s)" % (srcmgr_path, getExpressionPath(self.srcloc))).GetValueAsUnsigned()
+		return self.frame.EvaluateExpression("({0!s}).isLocalSourceLocation({1!s})".format(srcmgr_path, getExpressionPath(self.srcloc))).GetValueAsUnsigned()
 
 	def getPrint(self, srcmgr_path):
-		print_str = getValueFromExpression(self.srcloc, ".printToString(%s)" % srcmgr_path)
+		print_str = getValueFromExpression(self.srcloc, ".printToString({0!s})".format(srcmgr_path))
 		return print_str.GetSummary()
 
 	def summary(self):
@@ -62,8 +62,8 @@ class SourceLocation(object):
 			return "<invalid loc>"
 		srcmgr_path = findObjectExpressionPath("clang::SourceManager", self.frame)
 		if srcmgr_path:
-			return "%s (offset: %d, %s, %s)" % (self.getPrint(srcmgr_path), self.offset(), "macro" if self.isMacro() else "file", "local" if self.isLocal(srcmgr_path) else "loaded")
-		return "(offset: %d, %s)" % (self.offset(), "macro" if self.isMacro() else "file")
+			return "{0!s} (offset: {1:d}, {2!s}, {3!s})".format(self.getPrint(srcmgr_path), self.offset(), "macro" if self.isMacro() else "file", "local" if self.isLocal(srcmgr_path) else "loaded")
+		return "(offset: {0:d}, {1!s})".format(self.offset(), "macro" if self.isMacro() else "file")
 
 class QualType(object):
 	def __init__(self, qualty):
@@ -93,7 +93,7 @@ class StringRef(object):
 		string = data.ReadRawData(error, 0, data.GetByteSize())
 		if error.Fail():
 			return None
-		return '"%s"' % string
+		return '"{0!s}"'.format(string)
 
 
 # Key is a (function address, type name) tuple, value is the expression path for

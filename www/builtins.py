@@ -145,10 +145,10 @@ unhandled = [
 ]
 
 def report_repl(builtin, repl):
-  sys.stderr.write("%s:%d: x86 builtin %s used, replaced with %s\n" % (fileinput.filename(), fileinput.filelineno(), builtin, repl))
+  sys.stderr.write("{0!s}:{1:d}: x86 builtin {2!s} used, replaced with {3!s}\n".format(fileinput.filename(), fileinput.filelineno(), builtin, repl))
 
 def report_cant(builtin):
-  sys.stderr.write("%s:%d: x86 builtin %s used, too many replacements\n" % (fileinput.filename(), fileinput.filelineno(), builtin))
+  sys.stderr.write("{0!s}:{1:d}: x86 builtin {2!s} used, too many replacements\n".format(fileinput.filename(), fileinput.filelineno(), builtin))
 
 for line in fileinput.input(inplace=1):
   for builtin, repl in repl_map.iteritems():

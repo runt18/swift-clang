@@ -56,7 +56,7 @@ def main():
   if vim.eval('exists("l:lines")') == '1':
     lines = vim.eval('l:lines')
   else:
-    lines = '%s:%s' % (vim.current.range.start + 1, vim.current.range.end + 1)
+    lines = '{0!s}:{1!s}'.format(vim.current.range.start + 1, vim.current.range.end + 1)
 
   # Determine the cursor position.
   cursor = int(vim.eval('line2byte(line("."))+col(".")')) - 2
@@ -101,6 +101,6 @@ def main():
         vim.current.buffer[op[1]:op[2]] = lines[op[3]:op[4]]
     if output.get('IncompleteFormat'):
       print 'clang-format: incomplete (syntax errors)'
-    vim.command('goto %d' % (output['Cursor'] + 1))
+    vim.command('goto {0:d}'.format((output['Cursor'] + 1)))
 
 main()
