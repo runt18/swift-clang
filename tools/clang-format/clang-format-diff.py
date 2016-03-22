@@ -69,7 +69,7 @@ def main():
     match = re.search('^\+\+\+\ (.*?/){{{0!s}}}(\S*)'.format(args.p), line)
     if match:
       filename = match.group(2)
-    if filename == None:
+    if filename is None:
       continue
 
     if args.regex is not None:

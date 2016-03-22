@@ -145,7 +145,7 @@ class AnalysisRun:
         # reports. Assume that all reports were created using the same
         # clang version (this is always true and is more efficient).
         if 'clang_version' in data:
-            if self.clang_version == None:
+            if self.clang_version is None:
                 self.clang_version = data.pop('clang_version')
             else:
                 data.pop('clang_version')
